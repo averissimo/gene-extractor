@@ -20,3 +20,5 @@ Searchs independent search term against different databases
 ## Ackowledgements
 
 This tool was created as a part of [FCT](www.fct.p) grant SFRH/BD/97415/2013 and European Commission research project [BacHBerry](www.bachberry.eu) (FP7- 613793)
+
+### [Developer](http://web.tecnico.ulisboa.pt/andre.verissimo/)
