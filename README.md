@@ -7,8 +7,8 @@ Searchs independent search term against different databases
 
 ## Requirements
 
-- Ruby runtime environment
-- Bundle Gem
+- [Ruby runtime environment](https://www.ruby-lang.org/en/installation/)
+- Bundle Gem - `gem install bundle`
 
 ## How to Use
 
