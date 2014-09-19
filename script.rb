@@ -34,7 +34,7 @@ class DownloadGenes
       Dir.mkdir dir_name unless Dir.exists? (dir_name)
 
       puts "Starting with query: #{query}"
-      File.open File.join(dir_name,query), 'w' do |fw|
+      File.open File.join(dir_name,query + ".query"), 'w' do |fw|
         #
         search.keys.each do |i|
           key = i.to_s
@@ -60,7 +60,7 @@ class DownloadGenes
       result_list = ncbi.find(query,field)
       #
       puts "Starting with query: #{query}"
-      File.open File.join(dir_name,query), 'w' do |fw|
+      File.open File.join(dir_name,query + ".query), 'w' do |fw|
         #
         result = ncbi.download(result_list)
         fw.puts result
