@@ -2,8 +2,8 @@ Gene Extractor
 ==============
 
 Searchs independent search term against different databases
-- KEGG [link](http://www.genome.jp/kegg/kegg2.html)
-- GenBank [link](http://www.ncbi.nlm.nih.gov/genbank)
+- KEGG - [link](http://www.genome.jp/kegg/kegg2.html)
+- GenBank - [link](http://www.ncbi.nlm.nih.gov/genbank)
 
 ## Requirements
 
