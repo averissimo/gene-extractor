@@ -1,4 +1,4 @@
-Gene Extractor
+GeneExtractor
 ==============
 
 Searchs independent terms against different databases and retrieves gene sequences
