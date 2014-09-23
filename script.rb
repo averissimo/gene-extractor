@@ -1,13 +1,9 @@
-require 'wirb'
-require 'wirb/wp'
-require 'byebug'
+#require 'byebug'
+
+# require 'pry'
 
 require './ncbi.rb'
 require './kegg.rb'
-
-Wirb.start
-
-require 'pry'
 
 class DownloadGenes
 
@@ -33,7 +29,7 @@ class DownloadGenes
       dir_name =  "kegg_queries" # Time.new.strftime("%Y-%m-%d-%H-%M-%S") + "-" + ( '%04d' % rand(1000))
       Dir.mkdir dir_name unless Dir.exists? (dir_name)
 
-      puts "Starting with query: #{query}"
+      puts "Starting with query (KEGG): #{query}"
       File.open File.join(dir_name,query + ".query"), 'w' do |fw|
         #
         search.keys.each do |i|
@@ -59,10 +55,11 @@ class DownloadGenes
       #
       result_list = ncbi.find(query,field)
       #
-      puts "Starting with query: #{query}"
-      File.open File.join(dir_name,query + ".query), 'w' do |fw|
+      puts "Starting with query (NCBI): #{query}"
+      File.open File.join(dir_name,query + ".query"), 'w' do |fw|
         #
         result = ncbi.download(result_list)
+        puts "File size: " + result.size.to_s
         fw.puts result
         #
       end
@@ -74,5 +71,6 @@ end
 
 genes = DownloadGenes.new
 genes.ncbi( "Gene/Protein Name" )
+genes.kegg()
 
-binding.pry
+# binding.pry

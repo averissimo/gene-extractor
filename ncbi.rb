@@ -1,5 +1,4 @@
 require 'net/http'
-require 'rexml/document'
 require 'byebug'
 require 'json'
 require 'logger'
