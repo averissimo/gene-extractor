@@ -2,6 +2,7 @@ require 'net/http'
 require 'byebug'
 require 'json'
 require 'logger'
+require 'rexml/document'
 
 class NCBIAPI
 
@@ -17,8 +18,8 @@ class NCBIAPI
     @log = Logger.new(STDOUT)
   end
 
-  def download(list)
-    api( build_download_url(list) )
+  def download(list,rettype="fasta",retmode="text")
+    api( build_download_url(list, rettype, retmode) )
   end
 
   def find(term,field="",retstart=0)
@@ -32,9 +33,9 @@ class NCBIAPI
     list
   end
 
-  def build_download_url(ids)
+  def build_download_url( ids, retype, retmode )
     ids = [ids] if ids.is_a? String
-    uri = URI.parse BASE_PATH + DOWNLOAD_PREFIX + "db=#{FASTA_DB}&id=#{ids.join(',')}&rettype=fasta&retmode=text"
+    uri = URI.parse BASE_PATH + DOWNLOAD_PREFIX + "db=#{FASTA_DB}&id=#{ids.join(',')}&rettype=#{rettype}&retmode=#{retmode}"
     uri
   end
 
@@ -58,9 +59,44 @@ class NCBIAPI
     json_doc = begin
       JSON.parse(body)
     rescue
-      body
+      begin
+
+      rescue
+        body
+      end
     end
 
+  end
+
+  #
+  #
+  # static method to translate keys to
+  #  description and parent organism
+  def self.translate( )
+    translation = Hash.new
+    ncbi = NCBIAPI.new
+    File.open "translate-kegg.out.txt", 'w' do |fw|
+      File.open "translate.txt", 'r' do |f|
+        keys = f.read.split( /\n/ )
+        keys.each do |el|
+          # take only kegg lines
+          next unless el.start_with?(TRANSLATION_PREFIX)
+          # replace prefix with void
+          el = el.gsub Regexp.new("^" + TRANSLATION_PREFIX + " "), ""
+          resp = ncbi.download(el, "fasta", "xml")
+
+          xml_doc = REXML::Document.new(resp)
+
+
+
+          translation[el] = {}
+          translation[el][:definition] = resp.definition
+          translation[el][:organism]   = resp.organism
+          fw.puts translation[el][:definition] + "\t" + translation[el][:organism]
+        end
+      end
+    end
+    translation
   end
 
 end

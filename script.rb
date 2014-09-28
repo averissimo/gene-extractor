@@ -4,10 +4,17 @@
 
 require './ncbi.rb'
 require './kegg.rb'
+require 'logger'
 
 class DownloadGenes
 
+  def log() @logger end
+
   def initialize
+
+    @logger = Logger.new(STDOUT)
+    @logger.level = Logger::INFO
+
     read_query_file
   end
 
@@ -20,28 +27,30 @@ class DownloadGenes
 
   def kegg
     kegg = KeggAPI.new
-    # res = kegg.api("ath:AT1G03940")
+
     @queries.each do |query|
 
-      search = kegg.find(["genes",query])
+      search = kegg.find_genes(query).response
+      keys = search.keys
+      log.debug "keys: " + keys.join(", ")
 
       # create results dir
       dir_name =  "kegg_queries" # Time.new.strftime("%Y-%m-%d-%H-%M-%S") + "-" + ( '%04d' % rand(1000))
       Dir.mkdir dir_name unless Dir.exists? (dir_name)
 
-      puts "Starting with query (KEGG): #{query}"
+      log.info "Starting with query (KEGG): #{query}"
       File.open File.join(dir_name,query + ".query"), 'w' do |fw|
         #
-        search.keys.each do |i|
+        keys.each do |i|
           key = i.to_s
           res = kegg.download( key )
 
-          puts "  Definition: #{kegg.definition(res)}"
+          log.info "  Definition: #{res.definition}"
 
-          fw.puts kegg.ntseq( res )
+          fw.puts res.ntseq
         end
       end
-      puts "---------------"
+      log.info "---------------"
     end
   end
 
@@ -55,7 +64,7 @@ class DownloadGenes
       #
       result_list = ncbi.find(query,field)
       #
-      puts "Starting with query (NCBI): #{query}"
+      log.info "Starting with query (NCBI): #{query}"
       File.open File.join(dir_name,query + ".query"), 'w' do |fw|
         #
         result = ncbi.download(result_list)
@@ -63,14 +72,14 @@ class DownloadGenes
         fw.puts result
         #
       end
-      puts "---------------"
+      log.info "---------------"
     end
   end
 
 end
 
 genes = DownloadGenes.new
-genes.ncbi( "Gene/Protein Name" )
+#genes.ncbi( "Gene/Protein Name" )
 genes.kegg()
 
 # binding.pry
