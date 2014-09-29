@@ -143,7 +143,7 @@ class KeggAPI
           translation[el] = {}
           translation[el][:definition] = resp.definition
           translation[el][:organism]   = resp.organism
-          fw.puts translation[el][:definition] + "\t" + translation[el][:organism]
+          fw.puts [el, translation[el][:definition], translation[el][:organism]].join("\t")
         end
       end
     end
@@ -174,6 +174,7 @@ class KeggAPI
       response[last_head] << match[3]
       #
     end
+    byebug
     response
   end
 
