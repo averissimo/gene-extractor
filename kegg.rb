@@ -73,7 +73,9 @@ class KeggAPI
   #
   # interface to use "get" rest method
   def download(argument)
-    api(argument,"get")
+    res = api(argument,"get")
+    log.info "  Definition: #{res.definition}"
+    res
   end
 
   #

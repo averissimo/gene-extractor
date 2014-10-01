@@ -41,8 +41,6 @@ class DownloadGenes
           key = i.to_s
           res = kegg.download( key )
 
-          log.info "  Definition: #{res.definition}"
-
           fw.puts res.ntseq
         end
       end
@@ -58,13 +56,12 @@ class DownloadGenes
       dir_name =  "ncbi_queries" # Time.new.strftime("%Y-%m-%d-%H-%M-%S") + "-" + ( '%04d' % rand(1000))
       Dir.mkdir dir_name unless Dir.exists? (dir_name)
       #
-      result_list = ncbi.find(query,field)
-      #
       log.info "Starting with query (NCBI): #{query}"
+      result_list = ncbi.find(query,field)
       File.open File.join(dir_name,query + ".query"), 'w' do |fw|
         #
         until result_list.download_next_gene().nil? do
-          fw.puts result_list.ntseq
+          fw.puts result_list.ntseq unless result_list.ntseq.nil?
         end
         #
       end

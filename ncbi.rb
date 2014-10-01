@@ -36,8 +36,10 @@ class NCBIAPI
   def summaries(id_list, retstart=0)
     summary_url = build_summary_url( id_list, "", "json" )
     response = api( summary_url )
-    uids = response["result"]["uids"]
-    response["result"].delete "uids"
+    unless response["result"].nil?
+      uids = response["result"]["uids"]
+      response["result"].delete "uids"
+    end
     response["result"]
   end
 
@@ -73,7 +75,11 @@ class NCBIAPI
   # used to donwload one gene at a time.
   # it is useful to add uid annotation each query
   def download_next_gene()
-    raise "this object has no data (i.e. no summaries)" if @response.nil?
+    if @response.nil?
+      log.warn "this object has no data (i.e. no summaries)"
+      @ntseq = nil
+      return nil
+    end
     pop_summ = @response.shift
 
     return nil if pop_summ.nil?
@@ -102,6 +108,8 @@ class NCBIAPI
       else
         []
       end
+      #
+      log.info "Definition: #{sum["description"]}"
       # get fasta files
       new_items = get_genome_info( fasta_loc, sum["uid"])
       list = list.concat new_items
