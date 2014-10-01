@@ -2,6 +2,7 @@ require 'net/http'
 require 'json'
 require 'logger'
 require 'rexml/document'
+require 'byebug'
 
 class NCBIAPI
 
@@ -146,15 +147,8 @@ class NCBIAPI
   #
   #
   # search the database with a given term
-  def find(term,field="",retstart=0)
-    json_doc = api( build_search_url( term, field, retstart ))
-    results = json_doc["esearchresult"]
-
-    list = results["idlist"]
-
-    if results["retmax"] < results["count"]
-      list = list.concat( find(term, field, results["retmax"]) )
-    end
+  def find(term, field="")
+    list = find_recursive( term, field )
     new_ncbi = NCBIAPI.new summaries(list)
     new_ncbi
   end
@@ -189,6 +183,22 @@ class NCBIAPI
   end
 
   private
+
+  #
+  #
+  # recursive function to search the database with a given term
+  def find_recursive(term,field,retstart=0)
+    json_doc = api( build_search_url( term, field, retstart ))
+    results = json_doc["esearchresult"]
+
+    list = results["idlist"]
+
+    if results["retstart"].to_i < results["count"].to_i
+      log.debug "retmax: #{results["retmax"]} - count: #{results["count"]} - start: #{results["retstart"]}"
+      list = list.concat( find_recursive(term, field, results["retmax"] + results["retstart"]) )
+    end
+    list
+  end
 
   #
   #
