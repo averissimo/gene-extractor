@@ -1,5 +1,4 @@
 require 'net/http'
-require 'byebug'
 require 'json'
 require 'logger'
 require 'rexml/document'
@@ -173,6 +172,7 @@ class NCBIAPI
           translation[el][:uid]        = resp["uid"]
           translation[el][:definition] = resp["description"]
           translation[el][:organism]   = resp["orgname"]
+          translation[el][:organism] += " (#{resp["organism"]["commonname"]})" unless resp["organism"]["commonname"].empty?
           fw.puts [translation[el][:uid], translation[el][:definition],translation[el][:organism]].join("\t")
         end
       end

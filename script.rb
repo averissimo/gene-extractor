@@ -1,7 +1,3 @@
-#require 'byebug'
-
-# require 'pry'
-
 require './ncbi.rb'
 require './kegg.rb'
 require 'logger'
@@ -81,5 +77,3 @@ end
 genes = DownloadGenes.new
 genes.ncbi( "Gene/Protein Name" )
 genes.kegg()
-
-# binding.pry

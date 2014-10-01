@@ -1,5 +1,4 @@
 require 'net/http'
-require 'byebug'
 require 'logger'
 
 #
@@ -174,7 +173,6 @@ class KeggAPI
       response[last_head] << match[3]
       #
     end
-    byebug
     response
   end
 
