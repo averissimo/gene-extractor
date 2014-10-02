@@ -74,7 +74,7 @@ class KeggAPI
   # interface to use "get" rest method
   def download(argument)
     res = api(argument,"get")
-    log.info "  Definition: #{res.definition}"
+    log.info "  Definition (#{argument}): #{res.definition}"
     res
   end
 
@@ -89,7 +89,7 @@ class KeggAPI
   #
   # queries the rest API for genes with the speficif query
   def find_genes(query)
-    find( ['genes', query] )
+    find( ['genes', URI::escape("\"#{query}\"")] )
   end
 
   #

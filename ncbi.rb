@@ -2,7 +2,6 @@ require 'net/http'
 require 'json'
 require 'logger'
 require 'rexml/document'
-require 'byebug'
 
 class NCBIAPI
 
@@ -110,7 +109,7 @@ class NCBIAPI
         []
       end
       #
-      log.info "Definition: #{sum["description"]}"
+      log.info "  Definition (#{sum["uid"]}): #{sum["description"]}"
       # get fasta files
       new_items = get_genome_info( fasta_loc, sum["uid"])
       list = list.concat new_items
