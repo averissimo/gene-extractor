@@ -22,6 +22,35 @@ Searchs independent terms against different databases and retrieves gene sequenc
  - Open the file and change options (if need be)
 1. Run `ruby script.rb` to search and download all the associated genes
 
+### Config.yml options
+
+YML syntax is used to configure GeneExtractor. It is an hierarchical file that uses indentation to define children attribute or lists.
+
+- *email*: user's valid email address necessary to use NCBI Rest API
+- *output*:
+ - *dir*: parent folder to place results from GeneExtractor
+ - *data_prefix*: add an additional fodler level with date and time when GeneExtractor was executed
+ - *kegg*: folder name for kegg results
+ - *ncbi*: folder name for ncbi results
+- *search*:
+ - *ncbi*: list of fields that should be searched in NCBI (each field)
+
+#### example config.yml
+
+    email: gene.extractor@mailinator.com
+    output:
+      dir: queries
+      date_prefix: true
+      kegg: kegg
+      ncbi: ncbi
+
+    search:
+      ncbi:
+        - Protein name
+        - Gene name
+        - Title
+
+
 ## Ackowledgements
 
 This tool was created as a part of [FCT](www.fct.p) grant SFRH/BD/97415/2013 and European Commission research project [BacHBerry](www.bachberry.eu) (FP7- 613793)

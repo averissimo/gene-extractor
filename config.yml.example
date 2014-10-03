@@ -1,7 +1,7 @@
 email: gene.extractor@mailinator.com
 output:
   dir: queries
-  date_prefix: true
+  date_prefix: false
   kegg: kegg
   ncbi: ncbi
 
