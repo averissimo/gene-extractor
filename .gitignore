@@ -1,5 +1,6 @@
 *~
 keys.txt
-*_queries/
 translate.txt
 translate*.out.txt
+config.yml
+*queries/

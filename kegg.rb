@@ -82,7 +82,8 @@ class KeggAPI
   # method to search the KEGG2 database for a give
   #  set of keywords
   def find(query)
-    api(query,"find")
+    response = api(query,"find")
+    log.info " -> #{response.response.size} results"
   end
 
   #

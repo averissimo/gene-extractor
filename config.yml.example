@@ -1,0 +1,12 @@
+email: gene.extractor@mailinator.com
+output:
+  dir: queries
+  date_prefix: true
+  kegg: kegg
+  ncbi: ncbi
+
+search:
+  ncbi:
+    - Protein name
+    - Gene name
+    - Title

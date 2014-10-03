@@ -1,6 +1,8 @@
 require './ncbi.rb'
 require './kegg.rb'
+require 'yaml'
 require 'logger'
+require 'fileutils'
 
 class DownloadGenes
 
@@ -11,6 +13,23 @@ class DownloadGenes
     @logger = Logger.new(STDOUT)
     @logger.level = Logger::INFO
 
+    # load configuration
+    config = YAML.load_file('config.yml')
+
+    # create parent output directories
+    @dir_prefix = config["output"]["dir"]
+    FileUtils.mkdir @dir_prefix unless Dir.exists?(@dir_prefix)
+    if config["output"]["date_prefix"]
+      @dir_prefix = File.join( config["output"]["dir"], Time.now.strftime('%Y-%m-%d-%H-%M-%S.%L') + "_" + rand(1000000).to_s )
+      FileUtils.mkdir @dir_prefix unless Dir.exists?(@dir_prefix)
+    end
+    @kegg_dir = config["output"]["kegg"]
+    @ncbi_dir = config["output"]["ncbi"]
+    # get email
+    @email = config["email"]
+    # get array of fields to look
+    @search = config["search"]["ncbi"]
+    # read query file
     read_query_file
   end
 
@@ -31,11 +50,11 @@ class DownloadGenes
       log.debug "keys: " + keys.join(", ")
 
       # create results dir
-      dir_name =  "kegg_queries" # Time.new.strftime("%Y-%m-%d-%H-%M-%S") + "-" + ( '%04d' % rand(1000))
-      Dir.mkdir dir_name unless Dir.exists? (dir_name)
+      dirname = File.join(@dir_prefix, @kegg_dir)
+      Dir.mkdir dirname unless Dir.exists? (dirname)
 
       log.info "Starting with query (KEGG): #{query}"
-      File.open File.join(dir_name,query + ".query"), 'w' do |fw|
+      File.open File.join(dirname,query + ".query"), 'w' do |fw|
         #
         keys.each do |i|
           key = i.to_s
@@ -48,20 +67,23 @@ class DownloadGenes
     end
   end
 
-  def ncbi(field="")
-    ncbi = NCBIAPI.new
+  def ncbi()
+    ncbi = NcbiAPI.new @email
     #
     @queries.each do |query|
       #
-      dir_name =  "ncbi_queries" # Time.new.strftime("%Y-%m-%d-%H-%M-%S") + "-" + ( '%04d' % rand(1000))
-      Dir.mkdir dir_name unless Dir.exists? (dir_name)
+      dirname = File.join @dir_prefix, @ncbi_dir
+      Dir.mkdir dirname unless Dir.exists? (dirname)
       #
       log.info "Starting with query (NCBI): #{query}"
-      result_list = ncbi.find(query,field)
-      File.open File.join(dir_name,query + ".query"), 'w' do |fw|
+      result_list = ncbi.find(query,@search)
+      
+      File.open File.join(dirname,query + ".query"), 'w' do |fw|
         #
-        until result_list.download_next_gene().nil? do
-          fw.puts result_list.ntseq unless result_list.ntseq.nil?
+        genes = result_list.download_genes
+
+        genes.each do |gene|
+          fw.puts gene.ntseq unless gene.ntseq.nil?
         end
         #
       end
@@ -70,7 +92,10 @@ class DownloadGenes
   end
 
 end
-
+#require 'byebug'
 genes = DownloadGenes.new
-genes.ncbi( "Gene/Protein Name" )
+genes.ncbi()
 genes.kegg()
+
+#require 'pry'
+#binding.pry
