@@ -84,6 +84,7 @@ class KeggAPI
   def find(query)
     response = api(query,"find")
     log.info " -> #{response.response.size} results"
+    response
   end
 
   #
