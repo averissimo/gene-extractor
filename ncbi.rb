@@ -12,6 +12,8 @@ class NcbiAPI
   PROTEIN_DB  = "protein"
   DOWNLOAD_DB = "nuccore"
 
+  NUM_THREADS = 15
+
   SEARCH = "search"
   GENBANK = "GenBank"
   NA = "na"
@@ -77,18 +79,44 @@ class NcbiAPI
       raise msg
     end
 
-    list = @response.collect do |el|
-      # get the GenBank data for the protein (that should have a CDS)
-      ntseq = @ncbi.efetch el, { "db"=>DOWNLOAD_DB, "rettype"=>"fasta_cds_na" }
-      metadata = Bio::GenBank.new( @ncbi.efetch el, { "db"=>DOWNLOAD_DB, "rettype"=>"gb" })
-      ntseq.gsub /^([>])/, "\1#{el} "
-      log.info "  Definition (#{el}): #{metadata.definition}"
-      obj = NcbiAPI.new @email, ntseq, NA, el
-      obj
+    gene_queue = Queue.new
+    threads = []
+    @response.each { |el| gene_queue << el }
+
+    # multi-thread!!
+    NUM_THREADS.times.each do
+      threads << Thread.new do
+        result = []
+        until gene_queue.size == 0
+          el = gene_queue.pop
+          result << download_cds(el)
+        end
+        result
+      end
+    end
+    log.info "-- joinning"
+    result = threads.collect do |thr|
+      thr.value
+    end
+    # returns an array of genes (i.e. NCBI objects)
+    result.flatten
+  end
+
+  def download_cds(el)
+    # get the GenBank data for the protein (that should have a CDS)
+    ntseq = @ncbi.efetch el, { "db"=>DOWNLOAD_DB, "rettype"=>"fasta_cds_na" }
+    # add el to start of the query
+    ntseq = ntseq.gsub /^([\>])/, ">#{el} "
+    # get the protein name from query
+    begin
+      definition = ntseq.match(/\[protein=([^\]]+)/)[1]
+    rescue # if cannot determine protein, then show the default msg
+      definition = "(could not get protein from cds result)"
     end
 
-    # returns an array of genes (i.e. NCBI objects)
-    list
+    log.info "  Definition (#{el}): #{definition}"
+    obj = NcbiAPI.new @email, ntseq, NA, el
+    obj
   end
 
   def definition

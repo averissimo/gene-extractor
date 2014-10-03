@@ -77,7 +77,7 @@ class DownloadGenes
       #
       log.info "Starting with query (NCBI): #{query}"
       result_list = ncbi.find(query,@search)
-      
+
       File.open File.join(dirname,query + ".query"), 'w' do |fw|
         #
         genes = result_list.download_genes
@@ -92,10 +92,10 @@ class DownloadGenes
   end
 
 end
-#require 'byebug'
+require 'byebug'
 genes = DownloadGenes.new
 genes.ncbi()
-genes.kegg()
+#genes.kegg()
 
 #require 'pry'
 #binding.pry
