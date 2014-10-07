@@ -17,6 +17,8 @@ class KeggAPI
   DEFINITION = :DEFINITION
   TRANSLATION_PREFIX = "kegg"
 
+  NUM_THREADS = 15
+
   SEP = "/"
 
   REST_LINE_SEP   = /\n/
@@ -68,6 +70,32 @@ class KeggAPI
   # just a getter method to get the response stored in object
   def response
     @response
+  end
+
+
+  def download_genes()
+    keys = @response.keys
+    gene_queue = Queue.new
+    threads = []
+    keys.each { |el| gene_queue << el.to_s }
+
+    # multi-thread!!
+    NUM_THREADS.times.each do
+      threads << Thread.new do
+        result = []
+        until gene_queue.size == 0
+          el = gene_queue.pop
+          result << download(el)
+        end
+        result
+      end
+    end
+    log.info "-- joinning"
+    result = threads.collect do |thr|
+      thr.value
+    end
+    # returns an array of genes (i.e. NCBI objects)
+    result.flatten
   end
 
   #

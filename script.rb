@@ -45,8 +45,8 @@ class DownloadGenes
 
     @queries.each do |query|
 
-      search = kegg.find_genes(query).response
-      keys = search.keys
+      search = kegg.find_genes(query)
+      keys = search.response.keys
       log.debug "keys: " + keys.join(", ")
 
       # create results dir
@@ -54,12 +54,10 @@ class DownloadGenes
       Dir.mkdir dirname unless Dir.exists? (dirname)
 
       log.info "Starting with query (KEGG): #{query}"
+      result = search.download_genes()
       File.open File.join(dirname,query + ".query"), 'w' do |fw|
         #
-        keys.each do |i|
-          key = i.to_s
-          res = kegg.download( key )
-
+        result.each do |res|
           fw.puts res.ntseq
         end
       end
