@@ -92,7 +92,7 @@ class DownloadGenes
 end
 #require 'byebug'
 genes = DownloadGenes.new
-genes.ncbi()
+#genes.ncbi()
 genes.kegg()
 
 #require 'pry'

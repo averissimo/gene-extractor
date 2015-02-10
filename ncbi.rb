@@ -133,9 +133,9 @@ class NcbiAPI
     NcbiAPI.new(@email, protein, GENBANK, keyword)
   end
 
-  def self.translate
+  def self.translate(email)
     translation = Hash.new
-    ncbi = NcbiAPI.new
+    ncbi = NcbiAPI.new(email)
     File.open "translate-ncbi.out.txt", 'w' do |fw|
       File.open "translate.txt", 'r' do |f|
         keys = f.read.split( /\n/ )
