@@ -4,3 +4,6 @@ translate.txt
 translate*.out.txt
 config.yml
 *queries/
+.bundle/
+Gemfile.lock
+vendor/bundle/*

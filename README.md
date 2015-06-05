@@ -15,7 +15,7 @@ Searchs independent terms against different databases and retrieves gene sequenc
 
 ## How to Use
 
-1. Run `bundle install` to install dependencies *(currently only Bioruby)*
+1. Run `bundle install --local vendor/bundle` to install dependencies *(currently only Bioruby)*
 1. Create a `keys.txt` file *(either by copying keys.txt.example or creating a blank one)*
  - Add query terms to keys.txt *(separated by new lines)*
 1. Create a `config.yml` file *(either by copying keys.txt.example or creating a blank one)*
