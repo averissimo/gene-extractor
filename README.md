@@ -20,7 +20,8 @@ Searchs independent terms against different databases and retrieves gene sequenc
  - Add query terms to keys.txt *(separated by new lines)*
 1. Create a `config.yml` file *(either by copying keys.txt.example or creating a blank one)*
  - Open the file and change options (if need be)
-1. Run `ruby script.rb` to search and download all the associated genes
+1. Run `bundle exec ruby script.rb` to search and download all the associated genes
+ - If you don't install gems locally then just run `ruby script.rb`
 
 ### Config.yml options
 
