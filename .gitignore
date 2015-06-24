@@ -1,5 +1,7 @@
 *~
 keys.txt
+enzymes.txt
+compounds.txt
 translate.txt
 translate*.out.txt
 config.yml

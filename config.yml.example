@@ -3,6 +3,8 @@ output:
   dir: queries
   date_prefix: false
   kegg: kegg
+  kegg_compound: compound-kegg
+  kegg_enzyme: enzyme-kegg
   ncbi: ncbi
 
 search:
