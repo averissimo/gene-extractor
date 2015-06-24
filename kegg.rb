@@ -17,7 +17,7 @@ class KeggAPI
   DEFINITION = :DEFINITION
   TRANSLATION_PREFIX = "kegg"
 
-  NUM_THREADS = 15
+  NUM_THREADS = 30
 
   SEP = "/"
 

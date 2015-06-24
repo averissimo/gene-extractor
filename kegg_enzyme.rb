@@ -1,5 +1,5 @@
 require './kegg.rb'
-require 'byebug'
+
 #
 #
 # Each call to a specific operation will generate
@@ -31,6 +31,7 @@ class KeggEnzyme < KeggAPI
       compound_id = key.to_s
       result[compound_id.to_s] = enzymes_in_compound(compound_id)
 
+      next if result[compound_id.to_s].nil?
       result[compound_id.to_s].each do |enz|
         nt_to_download << get_genes_from_enzyme(enz)
       end
@@ -51,22 +52,38 @@ class KeggEnzyme < KeggAPI
     response = get_enzyme(enz)
     if response[:GENES]
       # some genes might
-      genes_query = response[:GENES].collect do |value|
+      gene_queue = Queue.new
+      response[:GENES].each do |value|
         genes = value.split
         species = genes.shift().downcase() # get first position
         genes.collect do |g|
-          species.to_s + g.gsub(/[(][^\).]+[)]/, '')
+          gene_queue << species.to_s + g.gsub(/\(.+\)$/, '')
         end
-      end.flatten
-      log.info("      -> found #{genes_query.size} genes for this enzyme (#{enz})")
-      #
-      genes_query.each_with_index do |gene,index|
-        gene_result = api(gene)
-        if (index + 1) % 10 == 0 || index == 0
-          log.info("        -> finished downloading gene #{index + 1}/#{genes_query.size}")
-        end
-        gene_result.ntseq(nil,enz)
       end
+      log.info("      -> found #{gene_queue.size} genes for this enzyme (#{enz})")
+      #
+      threads = []
+      # multi-thread!!
+      NUM_THREADS.times.each do
+        threads << Thread.new do
+          #
+          result = []
+          until gene_queue.size == 0
+            gene = gene_queue.pop
+            gene_result = api(gene)
+            log.info("        -> finished downloading gene (#{gene} - with #{gene_queue.size} in queue)")
+            result << gene_result.ntseq(nil,enz)
+          end
+          result
+          #
+        end
+      end
+
+      result = []
+      result = threads.collect do |thr|
+        thr.value
+      end.flatten.compact
+      return result
     else
       log.info("      -> found 0 genes for this enzyme (#{enz})")
       return []
@@ -83,11 +100,13 @@ class KeggEnzyme < KeggAPI
 
   def enzymes_in_compound(compound_id)
     enzymes = api(compound_id).response[:ENZYME]
-    result = nil if enzymes.nil?
-
-    result = enzymes.collect do |item|
-      item.split /[ \t]+/
-    end.flatten.compact
+    result = if enzymes.nil?
+      nil
+    else
+      result = enzymes.collect do |item|
+        item.split /[ \t]+/
+      end.flatten.compact
+    end
     log.info("    -> found #{result.nil? ? '0' : result.size} enzymes in this compound data (#{compound_id})")
     result
   end

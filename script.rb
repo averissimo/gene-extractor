@@ -153,11 +153,11 @@ class DownloadGenes
   end
 
 end
-#require 'byebug'
+
 genes = DownloadGenes.new
-#genes.ncbi()
-#genes.kegg()
-#genes.kegg_enzyme()
+genes.ncbi()
+genes.kegg()
+genes.kegg_enzyme()
 genes.kegg_compound()
 
 #require 'pry'
