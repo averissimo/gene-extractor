@@ -4,6 +4,7 @@ require './kegg_enzyme.rb'
 require 'yaml'
 require 'logger'
 require 'fileutils'
+#require 'byebug'
 
 class DownloadGenes
 
@@ -107,7 +108,6 @@ class DownloadGenes
     kegg = KeggAPI.new
 
     @queries.each do |query|
-
       search = kegg.find_genes(query)
       keys = search.response.keys
       log.debug "keys: " + keys.join(", ")

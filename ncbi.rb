@@ -49,7 +49,13 @@ class NcbiAPI
     end
     search_term = "(" + search_ary.join(" OR ") + ")" + " AND \"cds\"[Feature key]"
     #
-    @response = @ncbi.esearch search_term, { "db" => SEARCH_DB }, 0
+    begin
+      @response = @ncbi.esearch search_term, { "db" => SEARCH_DB }, 0
+    rescue Exception => e
+      log.error e.message
+      sleep 10
+      return find(term, field)
+    end
     @type = SEARCH
     @keyword = search_term
     log.info " -> #{@response.size} results"
@@ -104,7 +110,14 @@ class NcbiAPI
 
   def download_cds(el)
     # get the GenBank data for the protein (that should have a CDS)
-    ntseq = @ncbi.efetch el, { "db"=>DOWNLOAD_DB, "rettype"=>"fasta_cds_na" }
+    begin
+      ntseq = @ncbi.efetch el, { "db"=>DOWNLOAD_DB, "rettype"=>"fasta_cds_na" }
+    rescue Exception => e
+      log.error e.message
+      sleep 10 # sleep 10 seconds and retry
+      return download_cds(el)
+    end
+
     # add el to start of the query
     ntseq = ntseq.gsub /^([\>])/, ">#{el} "
     # get the protein name from query
@@ -114,7 +127,7 @@ class NcbiAPI
       definition = "(could not get protein from cds result)"
     end
 
-    log.info "  Definition (#{el}): #{definition}"
+    log.info "  NCBI: Definition (#{el}): #{definition}"
     obj = NcbiAPI.new @email, ntseq, NA, el
     obj
   end
