@@ -1,5 +1,6 @@
 require './ncbi.rb'
 require './kegg.rb'
+require './kegg_enzyme.rb'
 require 'yaml'
 require 'logger'
 require 'fileutils'
@@ -23,7 +24,9 @@ class DownloadGenes
       @dir_prefix = File.join( config["output"]["dir"], Time.now.strftime('%Y-%m-%d-%H-%M-%S.%L') + "_" + rand(1000000).to_s )
       FileUtils.mkdir @dir_prefix unless Dir.exists?(@dir_prefix)
     end
-    @kegg_dir = config["output"]["kegg"]
+    @kegg_dir          = config["output"]["kegg"]
+    @kegg_enzyme_dir   = config["output"]["kegg_enzyme"]
+    @kegg_compound_dir = config["output"]["kegg_compound"]
     @ncbi_dir = config["output"]["ncbi"]
     # get email
     @email = config["email"]
@@ -31,6 +34,10 @@ class DownloadGenes
     @search = config["search"]["ncbi"]
     # read query file
     read_query_file
+    # read enzymes file
+    read_enzyme_file
+    # read compound file
+    read_compound_file
   end
 
   def read_query_file
@@ -38,6 +45,62 @@ class DownloadGenes
       @queries = f.read.split("\n")
     end
     @queries
+  end
+
+  def read_enzyme_file
+    File.open "enzymes.txt", 'r' do |f|
+      @enzymes = f.read.split("\n")
+    end
+    @enzymes
+  end
+
+  def read_compound_file
+    File.open "compounds.txt", 'r' do |f|
+      @compounds = f.read.split("\n")
+    end
+    @enzymes
+  end
+
+  def kegg_compound
+    kegg = KeggEnzyme.new
+
+    @compounds.each do |query|
+
+      # create results dir
+      dirname = File.join(@dir_prefix, @kegg_compound_dir)
+      Dir.mkdir dirname unless Dir.exists? (dirname)
+
+      log.info "Starting Compound query (KEGG): #{query}"
+      result = kegg.get_genes_from_compound(query)
+      File.open File.join(dirname,query + ".query"), 'w' do |fw|
+        #
+        result.each do |res|
+          fw.puts res
+        end
+      end
+      log.info "---------------"
+    end
+  end
+
+  def kegg_enzyme
+    kegg = KeggEnzyme.new
+
+    @enzymes.each do |query|
+
+      # create results dir
+      dirname = File.join(@dir_prefix, @kegg_enzyme_dir)
+      Dir.mkdir dirname unless Dir.exists? (dirname)
+
+      log.info "Starting Enzyme query (KEGG): #{query}"
+      result = kegg.get_genes_from_enzyme(query)
+      File.open File.join(dirname,query + ".query"), 'w' do |fw|
+        #
+        result.each do |res|
+          fw.puts res
+        end
+      end
+      log.info "---------------"
+    end
   end
 
   def kegg
@@ -53,7 +116,7 @@ class DownloadGenes
       dirname = File.join(@dir_prefix, @kegg_dir)
       Dir.mkdir dirname unless Dir.exists? (dirname)
 
-      log.info "Starting with query (KEGG): #{query}"
+      log.info "Starting Gene query (KEGG): #{query}"
       result = search.download_genes()
       File.open File.join(dirname,query + ".query"), 'w' do |fw|
         #
@@ -73,7 +136,7 @@ class DownloadGenes
       dirname = File.join @dir_prefix, @ncbi_dir
       Dir.mkdir dirname unless Dir.exists? (dirname)
       #
-      log.info "Starting with query (NCBI): #{query}"
+      log.info "Starting Gene query (NCBI): #{query}"
       result_list = ncbi.find(query,@search)
 
       File.open File.join(dirname,query + ".query"), 'w' do |fw|
@@ -93,7 +156,9 @@ end
 #require 'byebug'
 genes = DownloadGenes.new
 #genes.ncbi()
-genes.kegg()
+#genes.kegg()
+#genes.kegg_enzyme()
+genes.kegg_compound()
 
 #require 'pry'
 #binding.pry

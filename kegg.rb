@@ -111,7 +111,7 @@ class KeggAPI
   #  set of keywords
   def find(query)
     response = api(query,"find")
-    log.info " -> #{response.response.size} results"
+    log.info "  -> #{response.response.size} results"
     response
   end
 
@@ -140,7 +140,7 @@ class KeggAPI
 
   #
   # interface to get all the ntseq data
-  def ntseq(response=nil)
+  def ntseq(response=nil,add_to_header=nil)
     response = @response if response.nil?
 
     return nil if response.nil?
@@ -151,7 +151,9 @@ class KeggAPI
     size = data.shift
 
     seq = data.join("\n")
-    header = ">" + response[ORGANISM].first.split.first + ":" + response[ENTRY].first.split.first + " " + response[DEFINITION].first
+    header = ">"
+    header = header + add_to_header + " " unless add_to_header.nil?
+    header = header + response[ORGANISM].first.split.first + ":" + response[ENTRY].first.split.first + " " + response[DEFINITION].first
     [header, seq, ""].join("\n")
   end
 
