@@ -1,6 +1,5 @@
 require 'net/http'
 require 'logger'
-
 #
 #
 # Each call to a specific operation will generate
@@ -127,7 +126,11 @@ class KeggAPI
   # simple interface to get definition
   def definition(response=nil)
     response = @response if response.nil?
+    begin
     response[DEFINITION].first
+    rescue 
+      response[:NAME].join(" ")
+    end
   end
 
   #
@@ -152,8 +155,8 @@ class KeggAPI
 
     seq = data.join("\n")
     header = ">"
-    header = header + add_to_header + " " unless add_to_header.nil?
     header = header + response[ORGANISM].first.split.first + ":" + response[ENTRY].first.split.first + " " + response[DEFINITION].first
+    header = header + "-- " + add_to_header unless add_to_header.nil?
     [header, seq, ""].join("\n")
   end
 
