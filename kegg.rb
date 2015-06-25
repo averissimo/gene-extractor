@@ -128,7 +128,7 @@ class KeggAPI
     response = @response if response.nil?
     begin
     response[DEFINITION].first
-    rescue 
+    rescue
       response[:NAME].join(" ")
     end
   end
@@ -192,6 +192,7 @@ class KeggAPI
               translation[el] = {}
               translation[el][:definition] = resp.definition
               translation[el][:organism]   = resp.organism
+              resp.log.info("#{el} has been translated to #{resp.definition} (with #{gene_queue.size} in queue)")
               result << [el, translation[el][:definition], translation[el][:organism]].join("\t")
             end
             result

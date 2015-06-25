@@ -12,7 +12,7 @@ class NcbiAPI
   PROTEIN_DB  = "protein"
   DOWNLOAD_DB = "nuccore"
 
-  NUM_THREADS = 15
+  NUM_THREADS = 30
 
   SEARCH = "search"
   GENBANK = "GenBank"
@@ -174,6 +174,7 @@ class NcbiAPI
               translation[el] = {}
               translation[el][:definition] = resp.definition
               translation[el][:organism]   = resp.organism
+              resp.log.info("#{el} has been translated to #{resp.definition} (with #{gene_queue.size} in queue)")
               result << [el, translation[el][:definition], translation[el][:organism]].join("\t")
             end
             result
