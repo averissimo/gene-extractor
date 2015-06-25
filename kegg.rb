@@ -170,16 +170,35 @@ class KeggAPI
     File.open "translate-kegg.out.txt", 'w' do |fw|
       File.open "translate.txt", 'r' do |f|
         keys = f.read.split( /\n/ )
+        gene_queue = Queue.new
+
         keys.each do |el|
-          # take only kegg lines
-          next unless el.start_with?(TRANSLATION_PREFIX)
-          # replace prefix with void
-          el = el.gsub Regexp.new("^" + TRANSLATION_PREFIX + " "), ""
-          resp = kegg.download(el)
-          translation[el] = {}
-          translation[el][:definition] = resp.definition
-          translation[el][:organism]   = resp.organism
-          fw.puts [el, translation[el][:definition], translation[el][:organism]].join("\t")
+          gene_queue << el
+        end
+
+        threads = []
+        # multi-thread!!
+        NUM_THREADS.times.each do
+          threads << Thread.new do
+            #
+            result = []
+            until gene_queue.size == 0
+              el = gene_queue.pop
+              # take only kegg lines
+              next unless el.start_with?(TRANSLATION_PREFIX)
+              # replace prefix with void
+              el = el.gsub Regexp.new("^" + TRANSLATION_PREFIX + " "), ""
+              resp = kegg.download(el)
+              translation[el] = {}
+              translation[el][:definition] = resp.definition
+              translation[el][:organism]   = resp.organism
+              result << [el, translation[el][:definition], translation[el][:organism]].join("\t")
+            end
+            result
+          end
+        end
+        threads.each do |thr|
+          fw.puts thr.value
         end
       end
     end
